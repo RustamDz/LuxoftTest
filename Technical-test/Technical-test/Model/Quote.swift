@@ -8,11 +8,12 @@
 import Foundation
 
 struct Quote {
+    var key: String?
     var symbol:String?
     var name:String?
     var currency:String?
     var readableLastChangePercent:String?
     var last:String?
     var variationColor:String?
-    var myMarket:Market?
+    weak var myMarket:Market?
 }
