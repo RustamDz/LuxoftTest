@@ -9,7 +9,10 @@ import UIKit
 
 class QuoteDetailsViewController: UIViewController {
     
-    private var quote:Quote? = nil
+    private var quote:Quote!
+    private let favouritesManager = FavouritesManager()
+    private var didChangeCallback: (()->())?
+    
     
     let symbolLabel = UILabel()
     let nameLabel = UILabel()
@@ -21,8 +24,9 @@ class QuoteDetailsViewController: UIViewController {
     
     
     
-    init(quote:Quote) {
+    init(quote:Quote, didChangeCallback: (()->())?) {
         super.init(nibName: nil, bundle: nil)
+        self.didChangeCallback = didChangeCallback
         self.quote = quote
     }
     
@@ -36,11 +40,11 @@ class QuoteDetailsViewController: UIViewController {
         view.backgroundColor = .white
         addSubviews()
         setupAutolayout()
-        symbolLabel.text = quote?.symbol
-        nameLabel.text = quote?.name
-        lastLabel.text = quote?.last
-        currencyLabel.text = quote?.currency
-        readableLastChangePercentLabel.text = quote?.readableLastChangePercent
+        symbolLabel.text = quote.symbol
+        nameLabel.text = quote.name
+        lastLabel.text = quote.last
+        currencyLabel.text = quote.currency
+        readableLastChangePercentLabel.text = quote.readableLastChangePercent
         
     }
     
@@ -65,7 +69,11 @@ class QuoteDetailsViewController: UIViewController {
         readableLastChangePercentLabel.layer.borderColor = UIColor.black.cgColor
         readableLastChangePercentLabel.font = .systemFont(ofSize: 30)
         
-        favoriteButton.setTitle("Add to favorites", for: .normal)
+        if (favouritesManager.isFavourite(quote: quote)) {
+            favoriteButton.setTitle("Remove favorite", for: .normal)
+        } else {
+            favoriteButton.setTitle("Add to favorites", for: .normal)
+        }
         favoriteButton.layer.cornerRadius = 6
         favoriteButton.layer.masksToBounds = true
         favoriteButton.layer.borderWidth = 3
@@ -129,6 +137,14 @@ class QuoteDetailsViewController: UIViewController {
     
     
     @objc func didPressFavoriteButton(_ sender:UIButton!) {
-        // TODO
+        if (favouritesManager.isFavourite(quote: quote)) {
+            favouritesManager.removeFavourite(quote: quote)
+            favoriteButton.setTitle("Add to favorites", for: .normal)
+            self.didChangeCallback?()
+        } else {
+            favouritesManager.addFavourite(quote: quote)
+            favoriteButton.setTitle("Remove favorite", for: .normal)
+            self.didChangeCallback?()
+        }
     }
 }
